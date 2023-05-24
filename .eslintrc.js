@@ -6,6 +6,7 @@ module.exports = {
     node: true,
   },
   extends: [
+    '@unocss',
     '@antfu',
     'plugin:vue/vue3-recommended',
     './.eslintrc-auto-import.json',
@@ -28,6 +29,7 @@ module.exports = {
         ],
       },
     ],
+    'vue/valid-attribute-name': 'off',
   },
   globals: {
     GIT_BRANCH: true,

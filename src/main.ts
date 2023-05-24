@@ -4,6 +4,7 @@ import router from './router';
 import './style.css';
 import './assets/scss/main.scss';
 import App from './App.vue';
+import 'virtual:uno.css';
 
 const store = createPinia();
 
