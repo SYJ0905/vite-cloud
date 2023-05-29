@@ -6,8 +6,16 @@ import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import UnoCSS from 'unocss/vite';
 
-/** element plus 解析 */
-// import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
+/**
+ * element plus
+ * import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
+ */
+
+/**
+ * Vuetify
+ * import vuetify from 'vite-plugin-vuetify';
+ */
+
 import postcssNested from 'postcss-nested';
 import viteCompression from 'vite-plugin-compression';
 
@@ -18,10 +26,12 @@ import viteCompression from 'vite-plugin-compression';
 dns.setDefaultResultOrder('verbatim');
 
 export default defineConfig(() => {
-  /** element plus 解析 */
-  // const ElementPlusSetting = ElementPlusResolver({
-  //   importStyle: 'sass',
-  // });
+  /**
+   * element plus
+   * const ElementPlusSetting = ElementPlusResolver({
+      importStyle: 'sass',
+    });
+   */
 
   // const env = loadEnv(mode, process.cwd());
 
@@ -65,7 +75,10 @@ export default defineConfig(() => {
           },
         ],
         resolvers: [
-          // ElementPlusSetting, /** element plus 解析 */
+          /**
+           * element plus
+           * ElementPlusSetting,
+           */
         ],
         eslintrc: {
           enabled: true,
@@ -84,6 +97,12 @@ export default defineConfig(() => {
           from: 'vue-router',
           names: ['RouterLink', 'RouterView'],
         }],
+        resolvers: [
+          /**
+           * element plus
+           * ElementPlusSetting,
+           */
+        ],
       }),
       viteCompression({}),
       // gitRevisionVitePlugin({
@@ -92,6 +111,10 @@ export default defineConfig(() => {
       //   lastCommitDateTime: false,
       // }),
       UnoCSS(),
+      /**
+       * Vuetify
+       * vuetify(),
+       */
     ],
     css: {
       postcss: {

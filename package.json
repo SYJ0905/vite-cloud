@@ -15,15 +15,20 @@
     "@vueuse/core": "^10.1.2",
     "axios": "^1.4.0",
     "dayjs": "^1.11.7",
+    "element-plus": "^2.3.5",
+    "js-cookie": "^3.0.5",
     "lodash-es": "^4.17.21",
     "pinia": "^2.0.36",
     "uuid": "^9.0.0",
+    "vite-plugin-vuetify": "^1.0.2",
     "vue": "^3.2.47",
-    "vue-router": "^4.2.0"
+    "vue-router": "^4.2.0",
+    "vuetify": "^3.3.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.38.6",
     "@rushstack/eslint-patch": "^1.2.0",
+    "@types/js-cookie": "^3.0.3",
     "@types/lodash-es": "^4.17.7",
     "@types/node": "^20.1.5",
     "@types/uuid": "^9.0.1",
