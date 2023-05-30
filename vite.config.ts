@@ -5,6 +5,7 @@ import vue from '@vitejs/plugin-vue';
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import UnoCSS from 'unocss/vite';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 /**
  * element plus
@@ -115,6 +116,7 @@ export default defineConfig(() => {
        * Vuetify
        * vuetify(),
        */
+      visualizer(),
     ],
     css: {
       postcss: {
