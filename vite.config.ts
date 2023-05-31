@@ -6,6 +6,13 @@ import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import UnoCSS from 'unocss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
+
+/**
+ * Quasar
+ * sass@1.32.12 必須使用此版本，可至官網確認是否已經修正
+ * import { quasar, transformAssetUrls } from '@quasar/vite-plugin'
+ */
 
 /**
  * element plus
@@ -43,7 +50,19 @@ export default defineConfig(() => {
     publicDir: 'public',
     base: '/',
     plugins: [
-      vue(),
+      vue({
+        template: { transformAssetUrls },
+      }),
+      /**
+       * Quasar
+       * quasar({
+          autoImportComponentCase: 'pascal',
+          sassVariables: 'src/quasar-variables.sass'
+        }),
+       */
+      quasar({
+        sassVariables: 'src/assets/scss/vendors/quasar-variables.scss',
+      }),
       AutoImport({
         include: [
           /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx

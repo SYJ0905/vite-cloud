@@ -1,8 +1,19 @@
 /**
+ * Quasar
+ * import { Quasar } from 'quasar';
+ * import '@quasar/extras/material-icons/material-icons.css';
+ * import 'quasar/src/css/index.sass';
+ */
+
+/**
  * element plus
  * import ElementPlus from 'element-plus';
  * import 'element-plus/dist/index.css';
  */
+
+import { Quasar } from 'quasar';
+import '@quasar/extras/material-icons/material-icons.css';
+import 'quasar/src/css/index.sass';
 
 import './style.css';
 import './assets/scss/main.scss';
@@ -25,6 +36,7 @@ const store = createPinia();
 export function createApp(options, rootProps) {
   const app = createBaseApp(options, rootProps);
   app
+    .use(Quasar, { plugins: {} })
     // .use(ElementPlus)
     // .use(vuetify)
     .use(router)
