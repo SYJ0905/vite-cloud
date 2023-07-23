@@ -1,6 +1,9 @@
 # This config is equivalent to both the '.circleci/extended/orb-free.yml' and the base '.circleci/config.yml'
 version: 2.1
 
+orbs:
+  node: circleci/node@3.0.0
+
 jobs:
   build: # this can be any name you choose
     docker:
@@ -32,4 +35,4 @@ jobs:
 workflows:
   build_and_test:
     jobs:
-      - build
+      - node/test
