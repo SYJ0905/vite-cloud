@@ -30,6 +30,6 @@ jobs:
             - node_modules
 
 workflows:
-  node-test:
+  build_and_test:
     jobs:
-      - node/test
+      - build
