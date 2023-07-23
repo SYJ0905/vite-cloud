@@ -9,6 +9,7 @@
     "types": [
       "node",
       "vite/client",
+      "jest"
     ],
     "outDir": "./dist",
     "target": "ES2020",

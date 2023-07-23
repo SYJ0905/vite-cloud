@@ -6,7 +6,8 @@ import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import UnoCSS from 'unocss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
+
+// import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
 
 /**
  * Quasar
@@ -50,9 +51,10 @@ export default defineConfig(() => {
     publicDir: 'public',
     base: '/',
     plugins: [
-      vue({
-        template: { transformAssetUrls },
-      }),
+      vue(),
+      // vue({
+      //   template: { transformAssetUrls },
+      // }),
       /**
        * Quasar
        * quasar({
@@ -60,9 +62,9 @@ export default defineConfig(() => {
           sassVariables: 'src/quasar-variables.sass'
         }),
        */
-      quasar({
-        sassVariables: 'src/assets/scss/vendors/quasar-variables.scss',
-      }),
+      // quasar({
+      //   sassVariables: 'src/assets/scss/vendors/quasar-variables.scss',
+      // }),
       AutoImport({
         include: [
           /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx
