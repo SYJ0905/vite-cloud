@@ -31,8 +31,12 @@ jobs:
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - node_modules
+      - run:
+          name: Run tests
+          command: pnpm test  # 执行 "test" 脚本（即 jest 测试）
 
 workflows:
+  version: 2
   build_and_test:
     jobs:
-      - node/test
+      - build
