@@ -14,7 +14,7 @@ function increment() {
     <h1 data-testId="currentCounter">
       當前點擊次數{{ count }}
     </h1>
-    <button @click.prevent="increment">
+    <button data-testId="addCounter" @click.prevent="increment">
       點我加1
     </button>
   </div>
