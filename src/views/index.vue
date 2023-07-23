@@ -2,7 +2,9 @@
 </script>
 
 <template>
-  <div />
+  <div>
+    <h1>測試CD運作</h1>
+  </div>
 </template>
 
 <style scoped>
