@@ -12,7 +12,7 @@ test('點擊一次後 = 當前點擊次數1', async () => {
   const wrapper = shallowMount(Counter);
 
   const incrementButton = wrapper.find('[data-testId="addCounter"]');
-  await incrementButton.trigger('click')
+  await incrementButton.trigger('click');
 
   const title = wrapper.find('[data-testId="currentCounter"]');
   expect(title.text()).toBe('當前點擊次數1');

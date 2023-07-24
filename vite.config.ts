@@ -1,5 +1,5 @@
-import { URL, fileURLToPath } from 'url';
-import dns from 'dns';
+import { URL, fileURLToPath } from 'node:url';
+import dns from 'node:dns';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import AutoImport from 'unplugin-auto-import/vite';

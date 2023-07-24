@@ -31,6 +31,7 @@ module.exports = {
       },
     ],
     'vue/valid-attribute-name': 'off',
+    'no-console': 'off',
   },
   globals: {
     GIT_BRANCH: true,
