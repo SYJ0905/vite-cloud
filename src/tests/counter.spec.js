@@ -15,5 +15,5 @@ test('點擊一次後 = 當前點擊次數1', async () => {
   await incrementButton.trigger('click');
 
   const title = wrapper.find('[data-testId="currentCounter"]');
-  expect(title.text()).toBe('當前點擊次數100');
+  expect(title.text()).toBe('當前點擊次數1');
 });
