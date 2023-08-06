@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { LOGIN_TOKEN } from './cookies';
 
-const url = window.location;
+// const url = window.location;
 const API_PATH = import.meta.env.VITE_API_PATH;
 // const API_PATH = ['localhost'].some(a => url.origin.includes(a)) ? import.meta.env.VITE_API_PATH : `${url.origin}`;
 
