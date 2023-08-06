@@ -15,6 +15,12 @@ const router = createRouter({
       component: () => import(/* @vite-ignore */'@/template/index.vue'),
       meta: {},
     },
+    {
+      path: '/message-board',
+      name: 'message-board',
+      component: () => import(/* @vite-ignore */'@/views/messageboard.vue'),
+      meta: {},
+    },
   ],
   scrollBehavior: () => {
     return Object.assign({ left: 0, top: 0 }, { x: 0, y: 0 });
