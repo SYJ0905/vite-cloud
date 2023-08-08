@@ -15,7 +15,7 @@ import {
 } from '@/plugins/api';
 
 const registerData = ref({
-  name: '',
+  username: '',
   age: 0,
   email: '',
   password: '',
@@ -166,7 +166,7 @@ async function delete_reply_message() {
           <span class="mr-2">用戶名:</span>
           <div class="flex flex-1">
             <input
-              v-model="registerData.name"
+              v-model="registerData.username"
               type="text"
               class="w-full flex-grow border rounded-md p-2"
             >
