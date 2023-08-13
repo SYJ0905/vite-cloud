@@ -2,7 +2,8 @@ import axios from 'axios';
 import { LOGIN_TOKEN } from './cookies';
 
 // const url = window.location;
-const API_PATH = 'https://python-message-board-api.onrender.com';
+const API_PATH = 'https://python-message-board-fast-api.onrender.com';
+// const API_PATH = 'https://python-message-board-api.onrender.com';
 // const API_PATH = ['localhost'].some(a => url.origin.includes(a)) ? import.meta.env.VITE_API_PATH : `${url.origin}`;
 
 function baseAxios(baseURL: string, setting?: object) {
@@ -60,6 +61,9 @@ function baseAxios(baseURL: string, setting?: object) {
 }
 
 const apiRequest = baseAxios(`${API_PATH}`);
+
+export const API_GET_ROOT = () => apiRequest.get('/', );
+export const API_GET_ROOT_INFO = () => apiRequest.get('/info', );
 
 export const API_POST_REGISTER = (data) => apiRequest.post('/user', data);
 export const API_POST_LOGIN = (data) => apiRequest.post('/auth/login', data);

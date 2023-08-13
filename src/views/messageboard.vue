@@ -4,6 +4,8 @@ import {
   API_DELETE_MESSAGE,
   API_DELETE_REPLY_MESSAGE,
   API_GET_MESSAGES,
+  API_GET_ROOT,
+  API_GET_ROOT_INFO,
   API_GET_USERLIST,
   API_GET_USER_DETAIL,
   API_POST_LOGIN,
@@ -156,6 +158,19 @@ async function delete_reply_message() {
     console.log('error =>', error);
   }
 }
+
+onMounted(async () => {
+  try {
+    const response = await Promise.all([
+      API_GET_ROOT_INFO(),
+      API_GET_ROOT(),
+    ]);
+    console.log('API_GET_ROOT response =>', response);
+  }
+  catch (error) {
+    console.log('error =>', error);
+  }
+});
 </script>
 
 <template>
