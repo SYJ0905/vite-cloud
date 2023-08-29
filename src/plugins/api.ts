@@ -70,7 +70,7 @@ export const API_POST_LOGIN = (data) => apiRequest.post('/login', data);
 export const API_POST_REGISTER = (data) => apiRequest.post('/user', data);
 export const API_GET_CURRENT_USER = () => apiRequest.get('/users/me');
 
-export const API_GET_USERLIST = () => apiRequest.get('/users');
+export const API_GET_USERLIST = (data) => apiRequest.post(`/users/${data.page}/${data.page_size}`);
 export const API_GET_USER_DETAIL = (id) => apiRequest.get(`/user/${id}`);
 export const API_UPDATE_USER_DETAIL = (id) => apiRequest.put(`/user/${id}`);
 export const API_DELETE_USER_DETAIL = (id) => apiRequest.delete(`/user/${id}`);
