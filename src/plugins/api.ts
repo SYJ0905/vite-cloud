@@ -17,6 +17,10 @@ function baseAxios(baseURL: string, setting?: object) {
     ...setting,
   });
   baseReq.interceptors.request.use((config) => {
+    if (config.data instanceof FormData
+      && config.headers
+      && config.headers['Content-Type'])
+      config.headers['Content-Type'] = 'multipart/form-data';
     if (config.headers
       && config.headers.Authorization)
       config.headers.Authorization = `Bearer ${LOGIN_TOKEN.get()}`;
@@ -62,21 +66,18 @@ function baseAxios(baseURL: string, setting?: object) {
 
 const apiRequest = baseAxios(`${API_PATH}`);
 
-export const API_GET_ROOT = () => apiRequest.get('/', );
-export const API_GET_ROOT_INFO = () => apiRequest.get('/info', );
-
+export const API_POST_LOGIN = (data) => apiRequest.post('/login', data);
 export const API_POST_REGISTER = (data) => apiRequest.post('/user', data);
-export const API_POST_LOGIN = (data) => apiRequest.post('/auth/login', data);
-
-export const API_GET_USER_DETAIL = (id) => apiRequest.get(`/user/${id}`);
-// export const API_UPDATE_USER_DETAIL = (id) => apiRequest.put(`/user/${id}`);
-// export const API_DELETE_USER_DETAIL = (id) => apiRequest.delete(`/user/${id}`);
+export const API_GET_CURRENT_USER = () => apiRequest.get('/users/me');
 
 export const API_GET_USERLIST = () => apiRequest.get('/users');
+export const API_GET_USER_DETAIL = (id) => apiRequest.get(`/user/${id}`);
+export const API_UPDATE_USER_DETAIL = (id) => apiRequest.put(`/user/${id}`);
+export const API_DELETE_USER_DETAIL = (id) => apiRequest.delete(`/user/${id}`);
 
 export const API_GET_MESSAGES = () => apiRequest.get('/messages');
 export const API_POST_MESSAGE = (data) => apiRequest.post('/message', data);
-export const API_UPDATE_MESSAGE = (data) => apiRequest.put(`/message/${data.message_id}`, data);
+export const API_UPDATE_MESSAGE = (message_id, data) => apiRequest.put(`/message/${message_id}`, data);
 export const API_DELETE_MESSAGE = (message_id) => apiRequest.delete(`/message/${message_id}`);
 
 export const API_POST_REPLY_MESSAGE = (data) => apiRequest.post('/reply', data);

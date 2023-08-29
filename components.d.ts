@@ -9,7 +9,9 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    Login: typeof import('./src/components/messageboard/Login.vue')['default']
     Messageboard: typeof import('./src/views/messageboard.vue')['default']
+    Register: typeof import('./src/components/messageboard/Register.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Views: typeof import('./src/views/index.vue')['default']

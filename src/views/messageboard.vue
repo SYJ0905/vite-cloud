@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { LOGIN_TOKEN } from '@/plugins/cookies';
+import Register from '@/components/messageboard/Register.vue';
+import Login from '@/components/messageboard/Login.vue';
 import {
   API_DELETE_MESSAGE,
   API_DELETE_REPLY_MESSAGE,
+  API_GET_CURRENT_USER,
   API_GET_MESSAGES,
-  API_GET_ROOT,
-  API_GET_ROOT_INFO,
   API_GET_USERLIST,
-  API_GET_USER_DETAIL,
   API_POST_LOGIN,
   API_POST_MESSAGE,
   API_POST_REGISTER,
@@ -15,6 +15,8 @@ import {
   API_UPDATE_MESSAGE,
   API_UPDATE_REPLY_MESSAGE,
 } from '@/plugins/api';
+
+const authType = ref('register');
 
 const registerData = ref({
   username: '',
@@ -26,7 +28,7 @@ async function register() {
   const payload = registerData.value;
   try {
     const response = await API_POST_REGISTER(payload);
-    console.log('register response =>', response);
+    console.log('註冊 =>', response);
   }
   catch (error) {
     console.log('error =>', error);
@@ -38,58 +40,109 @@ const loginData = ref({
   password: '',
 });
 async function login() {
-  const payload = loginData.value;
+  const payload = new FormData();
+  payload.append('username', loginData.value.email);
+  payload.append('password', loginData.value.password);
   try {
     const response = await API_POST_LOGIN(payload);
-    console.log('login response =>', response);
+    console.log('登入 response =>', response);
     if (response.status === 200)
-      await LOGIN_TOKEN.set(response.data.data.token);
+      await LOGIN_TOKEN.set(response.data.access_token);
+    await get_user();
   }
   catch (error) {
     console.log('error =>', error);
   }
 }
 
-const loginId = ref('');
+const currentUserData = ref<{
+  user_id: string
+  username: string
+  age: 0
+  email: string
+}>({
+  user_id: '',
+  username: '',
+  age: 0,
+  email: '',
+});
 async function get_user() {
   try {
-    const response = await API_GET_USER_DETAIL(loginId.value);
-    console.log('get_user response =>', response);
+    const response = await API_GET_CURRENT_USER();
+    console.log('當前使用者 response =>', response);
+    currentUserData.value = response.data.data;
   }
   catch (error) {
     console.log('error =>', error);
   }
 }
+watch(
+  () => authType.value,
+  (newValue) => {
+    if (newValue === 'login') {
+      currentUserData.value = {
+        user_id: '',
+        username: '',
+        age: 0,
+        email: '',
+      };
+    }
+    if (newValue === 'register') {
+      registerData.value = {
+        username: '',
+        age: 0,
+        email: '',
+        password: '',
+      };
+    }
+  },
+);
 
 async function get_user_list() {
   try {
     const response = await API_GET_USERLIST();
-    console.log('get_user_list response =>', response);
+    console.log('使用者列表 response =>', response);
   }
   catch (error) {
     console.log('error =>', error);
   }
 }
 
+const messageList = ref<{
+  message_id: string
+  content: string
+  create_account: string
+  create_at: string
+  replies: {
+    reply_id: string
+    content: string
+    create_account: string
+    create_at: string
+    message_id: string }[]
+}[]>([]);
 async function get_message_list() {
   try {
     const response = await API_GET_MESSAGES();
-    console.log('get_message_list response =>', response);
+    console.log('留言列表 response =>', response);
+    messageList.value = response.data.data;
   }
   catch (error) {
     console.log('error =>', error);
   }
 }
 
-const message = ref('');
 const messageId = ref('');
+const replyMessageId = ref('');
+const inputContent = ref('');
+const target_user_id = ref('');
+
 async function send_message() {
   const payload = {
-    content: message.value,
+    content: inputContent.value,
   };
   try {
     const response = await API_POST_MESSAGE(payload);
-    console.log('send_message response =>', response);
+    console.log('建立留言 response =>', response);
   }
   catch (error) {
     console.log('error =>', error);
@@ -98,12 +151,11 @@ async function send_message() {
 
 async function update_message() {
   const payload = {
-    message_id: messageId.value,
-    content: message.value,
+    content: inputContent.value,
   };
   try {
-    const response = await API_UPDATE_MESSAGE(payload);
-    console.log('send_message response =>', response);
+    const response = await API_UPDATE_MESSAGE(messageId.value, payload);
+    console.log('更新留言 response =>', response);
   }
   catch (error) {
     console.log('error =>', error);
@@ -113,23 +165,22 @@ async function update_message() {
 async function delete_message() {
   try {
     const response = await API_DELETE_MESSAGE(messageId.value);
-    console.log('delete_message response =>', response);
+    console.log('刪除留言 response =>', response);
+    await get_message_list();
   }
   catch (error) {
     console.log('error =>', error);
   }
 }
 
-const replyMessage = ref('');
-const replyMessageId = ref('');
 async function send_reply_message() {
   const payload = {
     message_id: messageId.value,
-    content: replyMessage.value,
+    content: inputContent.value,
   };
   try {
     const response = await API_POST_REPLY_MESSAGE(payload);
-    console.log('send_reply_message response =>', response);
+    console.log('建立回覆 response =>', response);
   }
   catch (error) {
     console.log('error =>', error);
@@ -138,11 +189,11 @@ async function send_reply_message() {
 
 async function update_reply_message() {
   const payload = {
-    content: replyMessage.value,
+    content: inputContent.value,
   };
   try {
     const response = await API_UPDATE_REPLY_MESSAGE(replyMessageId.value, payload);
-    console.log('update_reply_message response =>', response);
+    console.log('更新回覆 response =>', response);
   }
   catch (error) {
     console.log('error =>', error);
@@ -152,406 +203,381 @@ async function update_reply_message() {
 async function delete_reply_message() {
   try {
     const response = await API_DELETE_REPLY_MESSAGE(replyMessageId.value);
-    console.log('delete_reply_message response =>', response);
+    console.log('刪除回覆 response =>', response);
+    await get_message_list();
   }
   catch (error) {
     console.log('error =>', error);
   }
 }
 
-onMounted(async () => {
-  try {
-    const response = await Promise.all([
-      API_GET_ROOT_INFO(),
-      API_GET_ROOT(),
-    ]);
-    console.log('API_GET_ROOT response =>', response);
-  }
-  catch (error) {
-    console.log('error =>', error);
-  }
-});
+async function send_content() {
+  if (messageId.value === ''
+    && replyMessageId.value === ''
+    && target_user_id.value === ''
+  )
+    await send_message();
+
+  if (messageId.value !== ''
+    && replyMessageId.value === ''
+    && target_user_id.value === currentUserData.value.user_id
+  )
+    await update_message();
+
+  if (messageId.value !== ''
+    && replyMessageId.value === ''
+    && target_user_id.value !== currentUserData.value.user_id
+  )
+    await send_reply_message();
+
+  if (messageId.value === ''
+    && replyMessageId.value !== ''
+    && target_user_id.value === ''
+  )
+    await update_reply_message();
+
+  await get_message_list();
+}
 </script>
 
 <template>
-  <div class="flex p-8">
-    <div class="flex-1 pr-4">
-      <div class="register rounded-lg bg-gray-100 p-4 shadow-md">
-        <div class="mb-2 flex items-center">
-          <span class="mr-2">用戶名:</span>
-          <div class="flex flex-1">
-            <input
-              v-model="registerData.username"
-              type="text"
-              class="w-full flex-grow border rounded-md p-2"
-            >
-          </div>
-        </div>
-        <div class="mb-2 flex items-center">
-          <span class="mr-2">年齡:</span>
-          <div class="flex flex-1">
-            <input
-              v-model.number="registerData.age"
-              type="number"
-              class="w-full border rounded-md p-2"
-            >
-          </div>
-        </div>
-        <div class="mb-2 flex items-center">
-          <span class="mr-2">帳號:</span>
-          <div class="flex flex-1">
-            <input
-              v-model="registerData.email"
-              type="text"
-              class="w-full border rounded-md p-2"
-            >
-          </div>
-        </div>
-        <div class="mb-2 flex items-center">
-          <span class="mr-2">密碼:</span>
-          <div class="flex flex-1">
-            <input
-              v-model="registerData.password"
-              type="password"
-              class="w-full border rounded-md p-2"
-            >
-          </div>
-        </div>
-        <button
-          class="rounded-md bg-blue-500 p-2 text-white"
-          @click.prevent="register"
-        >
-          註冊
-        </button>
-      </div>
+  <div class="page-container">
+    <div class="left-section">
+      <div class="left-section">
+        <q-btn-toggle
+          v-model="authType"
+          class="mb-4"
+          toggle-color="primary"
+          :options="[
+            { label: '註冊', value: 'register' },
+            { label: '登入', value: 'login' },
+          ]"
+        />
 
-      <div class="login rounded-lg bg-gray-100 p-4 shadow-md">
-        <div class="mb-2 flex items-center">
-          <span class="mr-2">帳號:</span>
-          <div class="flex flex-1">
-            <input
-              v-model="loginData.email"
-              type="text"
-              class="w-full border rounded-md p-2"
-            >
+        <div
+          v-if="currentUserData.user_id"
+          class="user-info"
+        >
+          <div class="info-item">
+            <span class="info-label">用戶編號:</span>
+            <span class="info-value">{{ currentUserData.user_id }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">信箱:</span>
+            <span class="info-value">{{ currentUserData.email }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">用戶名稱:</span>
+            <span class="info-value">{{ currentUserData.username }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">年齡:</span>
+            <span class="info-value">{{ currentUserData.age }}</span>
           </div>
         </div>
-        <div class="mb-2 flex items-center">
-          <span class="mr-2">密碼:</span>
-          <div class="flex flex-1">
-            <input
-              v-model="loginData.password"
-              type="password"
-              class="w-full border rounded-md p-2"
+
+        <q-btn
+          v-if="currentUserData.user_id === ''"
+          color="blue"
+          label="取得當前使用者資訊"
+          @click="get_user"
+        />
+
+        <Register
+          v-if="authType === 'register' && currentUserData.user_id === ''"
+          v-model:registerData="registerData"
+          @handle-register="register"
+        />
+        <Login
+          v-if="authType === 'login' && currentUserData.user_id === ''"
+          v-model:loginData="loginData"
+          @handle-login="login"
+        />
+
+        <template v-if="currentUserData.user_id">
+          <div class="q-mb-md q-pa-md">
+            <q-btn
+              color="blue"
+              rounded
+              class="text-white"
+              @click="get_user_list"
             >
+              取得使用者列表
+            </q-btn>
           </div>
-        </div>
-        <button
-          class="rounded-md bg-blue-500 p-2 text-white"
-          @click.prevent="login"
-        >
-          登入
-        </button>
-      </div>
-
-      <div class="mb-4 p4">
-        <button
-          class="rounded-md bg-blue-500 p-2 text-white"
-          @click.prevent="get_user_list"
-        >
-          取得使用者列表
-        </button>
-      </div>
-
-      <div class="user rounded-lg bg-gray-100 p-4 shadow-md">
-        <div class="mb-2 flex items-center">
-          <span class="mr-2">當前使用者ID:</span>
-          <div class="flex flex-1">
-            <input
-              v-model="loginId"
-              type="text"
-              class="w-full border rounded-md p-2"
+          <div class="q-mb-md q-pa-md">
+            <q-btn
+              color="blue"
+              rounded
+              class="text-white"
+              @click="get_message_list"
             >
+              取得所有留言列表
+            </q-btn>
           </div>
-        </div>
-        <button
-          class="rounded-md bg-blue-500 p-2 text-white"
-          @click.prevent="get_user"
-        >
-          取得當前使用者資訊
-        </button>
-      </div>
 
-      <div class="mb-4 p4">
-        <button
-          class="rounded-md bg-blue-500 p-2 text-white"
-          @click.prevent="get_message_list"
-        >
-          取得所有留言列表
-        </button>
-      </div>
-
-      <div class="mb-4">
-        <div class="rounded-lg bg-gray-100 p-4 shadow-md">
-          <div class="mb-2 flex items-center">
-            <span class="mr-2">留言:</span>
-            <span class="mr-2">留言ID:</span>
-            <div class="flex flex-1">
-              <input
+          <div class="card-session q-pa-md q-mb-md rounded-lg bg-gray-100 shadow-md">
+            <div class="mb-2 flex items-center">
+              <span class="mr-2">留言ID:</span>
+              <q-input
                 v-model="messageId"
-                type="text"
-                class="w-full border rounded-md p-2"
+                filled
+                class="flex-grow"
+              />
+            </div>
+            <div class="mb-2 flex items-center">
+              <span class="mr-2">留言建立者ID:</span>
+              <q-input
+                v-model="target_user_id"
+                filled
+                class="flex-grow"
+              />
+            </div>
+            <div class="mb-2 flex items-center">
+              <q-btn
+                color="blue"
+                rounded
+                class="text-white"
+                @click="delete_message"
               >
+                刪除留言
+              </q-btn>
             </div>
           </div>
-          <div class="w-full flex">
-            <textarea
-              v-model="message"
-              rows="6"
-              class="w-full border rounded-md p-2"
-            />
-          </div>
-          <div class="mt-2">
-            <button
-              class="mr-2 rounded-md bg-blue-500 p-2 text-white"
-              @click.prevent="send_message"
-            >
-              發送留言
-            </button>
-            <button
-              class="mr-2 rounded-md bg-blue-500 p-2 text-white"
-              @click.prevent="update_message"
-            >
-              更新留言
-            </button>
-            <button
-              class="rounded-md bg-blue-500 p-2 text-white"
-              @click.prevent="delete_message"
-            >
-              刪除留言
-            </button>
-          </div>
-        </div>
-      </div>
 
-      <div class="mb-4">
-        <div class="rounded-lg bg-gray-100 p-4 shadow-md">
-          <div class="mb-2 flex items-center">
-            <span class="mr-2">回覆:</span>
-            <span class="mr-2">回覆ID:</span>
-            <div class="flex flex-1">
-              <input
+          <div class="card-session q-pa-md q-mb-md rounded-lg bg-gray-100 shadow-md">
+            <div class="mb-2 flex items-center">
+              <span class="mr-2">回覆ID:</span>
+              <q-input
                 v-model="replyMessageId"
-                type="text"
-                class="w-full border rounded-md p-2"
+                filled
+                class="flex-grow"
+              />
+            </div>
+            <div class="mb-2 flex items-center">
+              <q-btn
+                color="blue"
+                rounded
+                class="text-white"
+                @click="delete_reply_message"
               >
+                刪除回覆
+              </q-btn>
             </div>
           </div>
-          <div class="w-full flex">
-            <textarea
-              v-model="replyMessage"
-              rows="6"
-              class="w-full border rounded-md p-2"
-            />
+
+          <div class="card-session q-pa-md q-mb-md rounded-lg bg-gray-100 shadow-md">
+            <div class="mb-2 flex items-center">
+              <span class="mr-2">內容:</span>
+              <q-input
+                v-model="inputContent"
+                filled
+                textarea
+                rows="6"
+              />
+              <q-btn
+                color="blue"
+                rounded
+                class="text-white"
+                @click="send_content"
+              >
+                送出
+              </q-btn>
+            </div>
           </div>
-          <div class="mt-2">
-            <button
-              class="mr-2 rounded-md bg-blue-500 p-2 text-white"
-              @click.prevent="send_reply_message"
-            >
-              發送回覆留言
-            </button>
-            <button
-              class="mr-2 rounded-md bg-blue-500 p-2 text-white"
-              @click.prevent="update_reply_message"
-            >
-              更新回覆留言
-            </button>
-            <button
-              class="rounded-md bg-blue-500 p-2 text-white"
-              @click.prevent="delete_reply_message"
-            >
-              刪除回覆留言
-            </button>
-          </div>
-        </div>
+        </template>
       </div>
     </div>
-    <div class="flex-1 pr-4">
-      <h1 class="mb-4 text-2xl font-bold">
+    <div class="right-section">
+      <div class="page-title">
         留言列表
-      </h1>
-      <!-- 留言列表内容 -->
+      </div>
+      <div class="message-list">
+        <div
+          v-for="message in messageList"
+          :key="message.message_id"
+          class="message-card"
+        >
+          <div class="message-content">
+            {{ message.content }}
+          </div>
+          <div class="message-info">
+            <div class="message-id">
+              留言編號: {{ message.message_id }}
+            </div>
+            <div class="creator">
+              建立者: {{ message.create_account }}
+            </div>
+          </div>
+          <div class="replies">
+            <div
+              v-for="reply in message.replies"
+              :key="reply.reply_id"
+              class="reply-card"
+            >
+              <div class="reply-content">
+                {{ reply.content }}
+              </div>
+              <div class="reply-info">
+                <div class="reply-id">
+                  回覆編號: {{ reply.reply_id }}
+                </div>
+                <div class="creator">
+                  回覆者: {{ reply.create_account }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
-<!-- <template>
-  <div class="flex">
-    <div class="flex-auto">
-      <div class="register mb-16px">
-        <div class="mb-8px">
-          <span class="mr-8px">用戶名:</span>
-          <input
-            v-model="registerData.name"
-            type="text"
-          >
-        </div>
-        <div class="mb-8px">
-          <span class="mr-8px">年齡:</span>
-          <input
-            v-model.number="registerData.age"
-            type="number"
-          >
-        </div>
-        <div class="mb-8px">
-          <span class="mr-8px">帳號:</span>
-          <input
-            v-model="registerData.email"
-            type="text"
-          >
-        </div>
-        <div class="mb-8px">
-          <span class="mr-8px">密碼:</span>
-          <input
-            v-model="registerData.password"
-            type="text"
-          >
-        </div>
-        <button @click.prevent="register">
-          註冊
-        </button>
-      </div>
+<style lang="scss">
+.page-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
 
-      <div class="login mb-16px">
-        <div class="mb-8px">
-          <span class="mr-8px">帳號:</span>
-          <input
-            v-model="loginData.email"
-            type="text"
-          >
-        </div>
-        <div class="mb-8px">
-          <span class="mr-8px">密碼:</span>
-          <input
-            v-model="loginData.password"
-            type="text"
-          >
-        </div>
-        <button @click.prevent="login">
-          登入
-        </button>
-      </div>
+  .left-section {
+    flex: 1;
+    padding-right: 20px;
 
-      <div class="mb-16px">
-        <button @click.prevent="get_user_list">
-          取得使用者列表
-        </button>
-      </div>
+    .register,
+    .login,
+    .user,
+    .card-session {
+      background-color: #f5f5f5;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-bottom: 20px;
 
-      <div class="user mb-16px">
-        <div class="mb-8px">
-          <span class="mr-8px">當前使用者ID:</span>
-          <input
-            v-model="loginId"
-            type="text"
-          >
-        </div>
-        <button @click.prevent="get_user">
-          取得當前使用者資訊
-        </button>
-      </div>
+      .q-input {
+        width: 100%;
+        margin-bottom: 10px;
+      }
 
-      <div class="mb-16px">
-        <button @click.prevent="get_message_list">
-          取得所有留言列表
-        </button>
-      </div>
+      .q-btn {
+        background-color: #007bff;
+        border-radius: 5px;
+        color: white;
+        padding: 10px 20px;
+        margin-top: 10px;
+        cursor: pointer;
 
-      <div class="mb-16px">
-        <div class="mb-16px">
-          <span>留言:</span>
-          <span>留言ID:</span>
-          <input
-            v-model="messageId"
-            type="text"
-          >
-          <div>
-            <textarea
-              id=""
-              v-model="message"
-              name=""
-              cols="30"
-              rows="10"
-            />
-          </div>
-          <button
-            class="mr-3"
-            @click.prevent="send_message"
-          >
-            發送留言
-          </button>
+        &:hover {
+          background-color: #0056b3;
+        }
+      }
+    }
 
-          <button
-            class="mr-3"
-            @click.prevent="update_message"
-          >
-            更新留言
-          </button>
+    .q-btn {
+      width: 100%;
+      text-align: center;
+    }
+  }
 
-          <button
-            class="mr-3"
-            @click.prevent="delete_message"
-          >
-            刪除留言
-          </button>
-        </div>
-      </div>
+  .right-section {
+    flex: 1;
+    padding-left: 20px;
 
-      <div class="mb-16px">
-        <div class="mb-16px">
-          <span>回覆:</span>
-          <span>回覆ID:</span>
-          <input
-            v-model="replyMessageId"
-            type="text"
-          >
-          <div>
-            <textarea
-              id=""
-              v-model="replyMessage"
-              name=""
-              cols="30"
-              rows="10"
-            />
-          </div>
-          <button
-            class="mr-3"
-            @click.prevent="send_reply_message"
-          >
-            發送回覆留言
-          </button>
+    .page-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+  }
+}
 
-          <button
-            class="mr-3"
-            @click.prevent="update_reply_message"
-          >
-            更新回覆留言
-          </button>
+.message-list {
+  display: flex;
+  flex-direction: column;
+}
 
-          <button
-            class="mr-3"
-            @click.prevent="delete_reply_message"
-          >
-            刪除回覆留言
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="flex-auto">
-      <h1>留言列表</h1>
-    </div>
-  </div>
-</template> -->
+.message-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  margin: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
 
-<style scoped></style>
+.message-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.message-content {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.message-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #888888;
+}
+
+.creator {
+  margin-right: 8px;
+}
+
+.replies {
+  margin-top: 12px;
+}
+
+.reply-card {
+  background-color: #f7f7f7;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.reply-content {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.reply-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #888888;
+}
+
+.message-id,
+.reply-id {
+  font-weight: bold;
+}
+
+.user-info {
+  background-color: #f7f7f7;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.info-label {
+  font-weight: bold;
+  color: #333;
+}
+
+.info-value {
+  color: #555;
+}
+</style>
