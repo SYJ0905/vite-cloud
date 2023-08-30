@@ -100,6 +100,8 @@ watch(
 
 const page = ref(1);
 const page_size = ref(20);
+const page_rowcount = ref(0);
+const user_list = ref([]);
 async function get_user_list() {
   const payload = {
     page: page.value,
@@ -108,11 +110,19 @@ async function get_user_list() {
   try {
     const response = await API_GET_USERLIST(payload);
     console.log('使用者列表 response =>', response);
+    user_list.value = response.data.data.items;
+    page_rowcount.value = response.data.data.rowcount;
   }
   catch (error) {
     console.log('error =>', error);
   }
 }
+watch(
+  () => page.value,
+  async () => {
+    await get_user_list();
+  },
+);
 
 const messageList = ref<{
   message_id: string
@@ -244,6 +254,13 @@ async function send_content() {
 
   await get_message_list();
 }
+
+const columns = ref([
+  { name: 'user_id', label: 'user_id', field: 'user_id' },
+  { name: 'username', label: 'username', field: 'username' },
+  { name: 'age', label: 'age', field: 'age' },
+  { name: 'email', label: 'email', field: 'email' },
+]);
 </script>
 
 <template>
@@ -436,6 +453,26 @@ async function send_content() {
           </div>
         </div>
       </div>
+    </div>
+  </div>
+  <div class="page-container">
+    <div class="q-pa-md">
+      <q-table
+        title="使用者列表"
+        :rows="user_list"
+        :columns="columns"
+        row-key="user_id"
+        flat
+        bordered
+      />
+      <q-pagination
+        v-model="page"
+        :min="1"
+        :max="Math.ceil(page_rowcount / page_size)"
+        input
+        dense
+        @input="get_user_list"
+      />
     </div>
   </div>
 </template>
